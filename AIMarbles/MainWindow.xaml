@@ -1,0 +1,118 @@
+﻿<Window x:Class="AIMarbles.MainWindow"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       xmlns:local="clr-namespace:AIMarbles"
+       xmlns:behavior="clr-namespace:AIMarbles.Core.Behavior"
+       xmlns:vm="clr-namespace:AIMarbles.ViewModel"
+       mc:Ignorable="d"
+       Title="MainWindow" Height="450" Width="800">
+   <Grid>
+       <Grid.RowDefinitions>
+           <RowDefinition Height="25"/>
+           <RowDefinition Height="*" />
+       </Grid.RowDefinitions>
+       <Grid.ColumnDefinitions>
+           <ColumnDefinition Width="*"/>
+       </Grid.ColumnDefinitions>
+
+       <Grid Grid.Row="0">
+           <StackPanel Orientation="Horizontal">
+               <Button Content="Add Trigger" Command="{Binding AddItemCommand}"/>
+               <Button Content="Add Action" Command="{Binding AddItemCommand}"/>
+               <Button Content="Remove" Command="{Binding RemoveItemCommand}"/>
+           </StackPanel>
+       </Grid>
+
+       <Grid x:Name="CanvasHostGrid"
+             Grid.Row="1" Grid.Column="0"
+             Background="LightGray"
+             AllowDrop="True">
+           <ItemsControl ItemsSource="{Binding Items}"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Stretch">
+               <ItemsControl.Resources>
+                   <DataTemplate DataType="{x:Type vm:TriggerDraggableView}">
+                       <Ellipse Width="60" Height="60" Fill="LightGreen" behavior:DragBehavior.IsDraggable="True">
+                           <Ellipse.Style>
+                               <Style TargetType="Ellipse">
+                                   <Setter Property="Fill" Value="LightGreen" />
+                                   <Setter Property="Stroke" Value="Transparent" />
+                                   <Style.Triggers>
+                                       <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                           <Setter Property="Fill" Value="DarkGreen" />
+                                           <Setter Property="Stroke" Value="Black" />
+                                           <Setter Property="StrokeThickness" Value="2" />
+                                       </DataTrigger>
+                                   </Style.Triggers>
+                               </Style>
+                           </Ellipse.Style>
+                           <Ellipse.InputBindings>
+                               <MouseBinding MouseAction="LeftClick"
+                                 Command="{Binding DataContext.SelectItemCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                 CommandParameter="{Binding}"/>
+                           </Ellipse.InputBindings>
+                       </Ellipse>
+                   </DataTemplate>
+
+                   <DataTemplate DataType="{x:Type vm:ActionDraggableView}">
+                       <Rectangle Width="80" Height="40" Fill="LightCoral" behavior:DragBehavior.IsDraggable="True">
+                           <Rectangle.Style>
+                               <Style TargetType="Rectangle">
+                                   <Setter Property="Fill" Value="LightCoral" />
+                                   <Setter Property="Stroke" Value="Transparent" />
+                                   <Style.Triggers>
+                                       <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                           <Setter Property="Fill" Value="DarkRed" />
+                                           <Setter Property="Stroke" Value="Black" />
+                                           <Setter Property="StrokeThickness" Value="2" />
+                                       </DataTrigger>
+                                   </Style.Triggers>
+                               </Style>
+                           </Rectangle.Style>
+                           <Rectangle.InputBindings>
+                               <MouseBinding MouseAction="LeftClick"
+                                 Command="{Binding DataContext.SelectItemCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                 CommandParameter="{Binding}"/>
+                           </Rectangle.InputBindings>
+                       </Rectangle>
+                   </DataTemplate>
+
+                   <DataTemplate DataType="{x:Type vm:DraggableView}">
+                       <Border Width="50" Height="50" Background="Gray" behavior:DragBehavior.IsDraggable="True">
+                           <Border.InputBindings>
+                               <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.SelectItemCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"/>
+                           </Border.InputBindings>
+                           <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Black"/>
+                           <Border.Style>
+                               <Style TargetType="Border">
+                                   <Setter Property="Background" Value="Gray" />
+                                   <Setter Property="BorderBrush" Value="Transparent" />
+                                   <Style.Triggers>
+                                       <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                           <Setter Property="Background" Value="DarkGray" />
+                                           <Setter Property="BorderBrush" Value="Black" />
+                                           <Setter Property="BorderThickness" Value="2" />
+                                       </DataTrigger>
+                                   </Style.Triggers>
+                               </Style>
+                           </Border.Style>
+                       </Border>
+                   </DataTemplate>
+               </ItemsControl.Resources>
+               <ItemsControl.ItemsPanel>
+                   <ItemsPanelTemplate>
+                       <Canvas Background="Transparent" />
+                   </ItemsPanelTemplate>
+               </ItemsControl.ItemsPanel>
+               <ItemsControl.ItemContainerStyle>
+                   <Style TargetType="ContentPresenter">
+                       <Setter Property="Canvas.Left" Value="{Binding X}" />
+                       <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                   </Style>
+               </ItemsControl.ItemContainerStyle>
+           </ItemsControl>
+       </Grid>
+   </Grid>
+</Window>

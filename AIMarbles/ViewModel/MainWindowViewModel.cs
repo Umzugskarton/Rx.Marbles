@@ -12,32 +12,32 @@ namespace AIMarbles.ViewModel
     internal partial class MainWindowViewModel : ViewModelBase
    {
         // this will move into a service
-        public State<IEnumerable<DraggableView>> ItemsState;
+        public State<IEnumerable<CanvasObjectViewModelBase>> ItemsState;
 
         [ObservableProperty]
-        public IEnumerable<DraggableView> _items = new List<DraggableView>();
+        public IEnumerable<CanvasObjectViewModelBase> _items = new List<CanvasObjectViewModelBase>();
 
         [ObservableProperty]
-        private DraggableView? _selectedDraggableItem;
+        private CanvasObjectViewModelBase? _selectedDraggableItem;
         public MainWindowViewModel() { 
-            ItemsState = new State<IEnumerable<DraggableView>>(new List<DraggableView>());
+            ItemsState = new State<IEnumerable<CanvasObjectViewModelBase>>(new List<CanvasObjectViewModelBase>());
             SubscribeToItemsState();
         }
 
         [RelayCommand]
         private void AddAction()
         {
-            ItemsState.SetState(ItemsState.CurrentValue.Append(new DraggableView { X = 50, Y = 50 }));
+            ItemsState.SetState(ItemsState.CurrentValue.Append(new ActionViewModel { X = 50, Y = 50 }));
         }
 
         [RelayCommand]
         private void AddTrigger()
         {
-            ItemsState.SetState(ItemsState.CurrentValue.Append(new DraggableView { X = 50, Y = 50 }));
+            ItemsState.SetState(ItemsState.CurrentValue.Append(new TriggerViewModel { X = 50, Y = 50 }));
         }
 
         [RelayCommand]
-        private void SelectItem(DraggableView item)
+        private void SelectItem(CanvasObjectViewModelBase item)
         {
             if (item == null) return;
 
@@ -64,13 +64,13 @@ namespace AIMarbles.ViewModel
                 return;
             }
 
-            IEnumerable<DraggableView> items = ItemsState.CurrentValue;
+            IEnumerable<CanvasObjectViewModelBase> items = ItemsState.CurrentValue;
 
             if (!items.Contains(SelectedDraggableItem)) {
                 return;
             }
 
-            List<DraggableView> itemsList = items.ToList();
+            List<CanvasObjectViewModelBase> itemsList = items.ToList();
             itemsList.Remove(SelectedDraggableItem);
             ItemsState.SetState(itemsList);
         }

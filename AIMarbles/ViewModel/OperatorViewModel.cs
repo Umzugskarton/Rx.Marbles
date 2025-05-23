@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AIMarbles.ViewModel
 {
-    internal class TriggerViewModel: CanvasObjectViewModelBase
+    internal class OperatorViewModel: CanvasObjectViewModelBase
     {
     }
 }

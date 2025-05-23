@@ -1,5 +1,4 @@
-﻿using AIMarbles.ViewModel;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,7 +9,7 @@ namespace AIMarbles.Core.Behavior
     class DragState
     {
         public Point StartPoint { get; set; }
-        public DraggableView? DraggingItem { get; set; }
+        public CanvasObjectViewModelBase? DraggingItem { get; set; }
         public Canvas? ParentCanvas { get; set; } 
     }
 
@@ -49,7 +48,7 @@ namespace AIMarbles.Core.Behavior
 
         private static void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (!(sender is FrameworkElement element && element.DataContext is DraggableView item)) return;
+            if (!(sender is FrameworkElement element && element.DataContext is CanvasObjectViewModelBase item)) return;
 
             var dragState = new DragState
             {
@@ -80,7 +79,7 @@ namespace AIMarbles.Core.Behavior
                 return;
             }
 
-            DraggableView draggingItem = dragState.DraggingItem;
+            CanvasObjectViewModelBase draggingItem = dragState.DraggingItem;
             Canvas parentCanvas = dragState.ParentCanvas;
 
             // Get current mouse position relative to the parent Canvas

@@ -33,7 +33,7 @@
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Stretch">
                <ItemsControl.Resources>
-                   <DataTemplate DataType="{x:Type vm:TriggerDraggableView}">
+                   <DataTemplate DataType="{x:Type vm:TriggerViewModel}">
                        <Ellipse Width="60" Height="60" Fill="LightGreen" behavior:DragBehavior.IsDraggable="True">
                            <Ellipse.Style>
                                <Style TargetType="Ellipse">
@@ -56,7 +56,7 @@
                        </Ellipse>
                    </DataTemplate>
 
-                   <DataTemplate DataType="{x:Type vm:ActionDraggableView}">
+                   <DataTemplate DataType="{x:Type vm:ActionViewModel}">
                        <Rectangle Width="80" Height="40" Fill="LightCoral" behavior:DragBehavior.IsDraggable="True">
                            <Rectangle.Style>
                                <Style TargetType="Rectangle">
@@ -79,7 +79,29 @@
                        </Rectangle>
                    </DataTemplate>
 
-                   <DataTemplate DataType="{x:Type vm:DraggableView}">
+                   <DataTemplate DataType="{x:Type vm:OperatorViewModel}">
+                       <Border Width="50" Height="50" Background="Gray" behavior:DragBehavior.IsDraggable="True">
+                           <Border.InputBindings>
+                               <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.SelectItemCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"/>
+                           </Border.InputBindings>
+                           <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Black"/>
+                           <Border.Style>
+                               <Style TargetType="Border">
+                                   <Setter Property="Background" Value="Gray" />
+                                   <Setter Property="BorderBrush" Value="Transparent" />
+                                   <Style.Triggers>
+                                       <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                           <Setter Property="Background" Value="DarkGray" />
+                                           <Setter Property="BorderBrush" Value="Black" />
+                                           <Setter Property="BorderThickness" Value="2" />
+                                       </DataTrigger>
+                                   </Style.Triggers>
+                               </Style>
+                           </Border.Style>
+                       </Border>
+                   </DataTemplate>
+
+                   <DataTemplate DataType="{x:Type vm:OperatorViewModel}">
                        <Border Width="50" Height="50" Background="Gray" behavior:DragBehavior.IsDraggable="True">
                            <Border.InputBindings>
                                <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.SelectItemCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"/>

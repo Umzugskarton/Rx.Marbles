@@ -17,10 +17,12 @@
            <ColumnDefinition Width="*"/>
        </Grid.ColumnDefinitions>
 
-       <Grid Grid.Row="0">
+<!-- move into own component-->
+        <Grid Grid.Row="0">
            <StackPanel Orientation="Horizontal">
-               <Button Content="Add Trigger" Command="{Binding AddItemCommand}"/>
-               <Button Content="Add Action" Command="{Binding AddItemCommand}"/>
+               <Button Content="Add Trigger" Command="{Binding AddTriggerCommand}"/>
+               <Button Content="Add Action" Command="{Binding AddActionCommand}"/>
+               <Button Content="Add Action" Command="{Binding AddOperatorCommand}"/>
                <Button Content="Remove" Command="{Binding RemoveItemCommand}"/>
            </StackPanel>
        </Grid>
@@ -101,8 +103,23 @@
                        </Border>
                    </DataTemplate>
 
-                   <DataTemplate DataType="{x:Type vm:OperatorViewModel}">
-                       <Border Width="50" Height="50" Background="Gray" behavior:DragBehavior.IsDraggable="True">
+                   <DataTemplate DataType="{x:Type vm:ConnectionViewModel}">
+                        <Path  
+                                                Height="2"
+                                                Width="2"
+                                                Fill="Black">
+                            <Path.Data>
+                                <EllipseGeometry 
+                                                            RadiusX="1" 
+                                                            RadiusY="1"
+                                                                       />
+                            </Path.Data>
+                            <Path.RenderTransform>
+                                <TranslateTransform X="{Binding StartX}" Y="{Binding StartY}"/>
+                            </Path.RenderTransform>
+k
+                        </Path>
+                        <Border Width="50" Height="50" Background="Gray">
                            <Border.InputBindings>
                                <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.SelectItemCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}"/>
                            </Border.InputBindings>

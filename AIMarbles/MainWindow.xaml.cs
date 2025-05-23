@@ -1,4 +1,5 @@
-﻿using AIMarbles.ViewModel;
+﻿using AIMarbles.Core.Service;
+using AIMarbles.ViewModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,10 +18,12 @@ namespace AIMarbles
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        private CanvasObjectService _canvasObjectService = new CanvasObjectService();
         public MainWindow()
         {
             InitializeComponent();
-            MainWindowViewModel vm = new();
+            MainWindowViewModel vm = new MainWindowViewModel(_canvasObjectService);
             DataContext = vm;
         }
     }

@@ -1,7 +1,8 @@
-﻿using AIMarbles.Core.Service;
-using AIMarbles.ViewModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,24 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AIMarbles
+namespace AIMarbles.View
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for ActionView.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class ActionView : UserControl
     {
-
-        private MainWindow()
+        public ActionView()
         {
             InitializeComponent();
         }
-
-        public MainWindow(MainWindowViewModel viewModel)
-        {
-            InitializeComponent();
-            DataContext = viewModel;
-        }
-
     }
 }

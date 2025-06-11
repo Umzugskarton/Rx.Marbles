@@ -1,30 +1,25 @@
-﻿using System.Diagnostics;
+﻿using AIMarbles.Extensions;
+using Microsoft.Xaml.Behaviors;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace AIMarbles.Core.Behavior
 {
-    class DragState
+    public class DragBehavior : Behavior<FrameworkElement>
     {
-        public Point StartPoint { get; set; }
-        public CanvasObjectViewModelBase? DraggingItem { get; set; }
-        public Canvas? ParentCanvas { get; set; } 
-    }
+        // This attached property will store the CanvasBehaviorState for each element
 
-    public static class DragBehavior
-    {
-        // This attached property will store the DragState for each element
-        private static readonly DependencyProperty CurrentDragStateProperty =
-            DependencyProperty.RegisterAttached("CurrentDragState", typeof(DragState), typeof(DragBehavior), new PropertyMetadata(null));
-
+        private static readonly DependencyProperty CurrentCanvasBehaviorStateProperty =
+            DependencyProperty.RegisterAttached("CurrentCanvasBehaviorState", typeof(CanvasBehaviorState), typeof(DragBehavior), new PropertyMetadata(null));
 
         public static bool GetIsDraggable(DependencyObject obj) => (bool)obj.GetValue(IsDraggableProperty);
         public static void SetIsDraggable(DependencyObject obj, bool value) => obj.SetValue(IsDraggableProperty, value);
 
         public static readonly DependencyProperty IsDraggableProperty =
             DependencyProperty.RegisterAttached("IsDraggable", typeof(bool), typeof(DragBehavior), new PropertyMetadata(false, OnIsDraggableChanged));
+
 
         private static void OnIsDraggableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -42,7 +37,7 @@ namespace AIMarbles.Core.Behavior
                 element.PreviewMouseMove -= OnPreviewMouseMove;
                 element.PreviewMouseUp -= OnPreviewMouseUp;
                 // Clean up the attached state when behavior is removed
-                element.ClearValue(CurrentDragStateProperty);
+                element.ClearValue(CurrentCanvasBehaviorStateProperty);
             }
         }
 
@@ -50,19 +45,18 @@ namespace AIMarbles.Core.Behavior
         {
             if (!(sender is FrameworkElement element && element.DataContext is CanvasObjectViewModelBase item)) return;
 
-            var dragState = new DragState
+            var dragState = new CanvasBehaviorState
             {
-                DraggingItem = item,
+                BehaviorObject = item,
                 StartPoint = e.GetPosition(element)
             };
 
-            var contentPresenter = VisualTreeHelper.GetParent(element) as ContentPresenter;
-            if (contentPresenter != null)
+            if (VisualTreeHelperExtensions.FindParent<Canvas>(element, out Canvas? parentCanvas))
             {
-                dragState.ParentCanvas = VisualTreeHelper.GetParent(contentPresenter) as Canvas;
+                dragState.ParentCanvas = parentCanvas;
             }
 
-            element.SetValue(CurrentDragStateProperty, dragState);
+            element.SetValue(CurrentCanvasBehaviorStateProperty, dragState);
             element.CaptureMouse(); // Crucial for continuous dragging even if mouse leaves element
 
             Trace.WriteLine($"Drag started for {item.Name}. StartPoint (relative to item): {dragState.StartPoint}");
@@ -73,13 +67,13 @@ namespace AIMarbles.Core.Behavior
             if (!(sender is FrameworkElement element)) return;
 
             // Retrieve the instance-specific drag state
-            var dragState = element.GetValue(CurrentDragStateProperty) as DragState;
-            if (dragState == null || dragState.DraggingItem == null || dragState.ParentCanvas == null)
+            var dragState = element.GetValue(CurrentCanvasBehaviorStateProperty) as CanvasBehaviorState;
+            if (dragState == null || dragState.BehaviorObject == null || dragState.ParentCanvas == null)
             {
                 return;
             }
 
-            CanvasObjectViewModelBase draggingItem = dragState.DraggingItem;
+            CanvasObjectViewModelBase draggingObject = dragState.BehaviorObject;
             Canvas parentCanvas = dragState.ParentCanvas;
 
             // Get current mouse position relative to the parent Canvas
@@ -96,15 +90,15 @@ namespace AIMarbles.Core.Behavior
 
             if (canvasWidth <= 0 || canvasHeight <= 0)
             {
-                Trace.WriteLine($"WARNING: Canvas ActualWidth ({canvasWidth}) or ActualHeight ({canvasHeight}) is zero. Cannot constrain movement. Item: {draggingItem.Name}. Check XAML layout for ItemsControl and its parent.");
+                Trace.WriteLine($"WARNING: Canvas ActualWidth ({canvasWidth}) or ActualHeight ({canvasHeight}) is zero. Cannot constrain movement. Item: {draggingObject.Name}. Check XAML layout for ItemsControl and its parent.");
                 return; // Prevent movement if canvas size is unknown
             }
 
             // Clamp the new position within canvas bounds
-            draggingItem.X = Math.Max(0, Math.Min(newX, canvasWidth - itemWidth));
-            draggingItem.Y = Math.Max(0, Math.Min(newY, canvasHeight - itemHeight));
+            draggingObject.X = Math.Max(0, Math.Min(newX, canvasWidth - itemWidth));
+            draggingObject.Y = Math.Max(0, Math.Min(newY, canvasHeight - itemHeight));
 
-            Trace.WriteLine($"Item {draggingItem.Name} moved to ({draggingItem.X:F2}|{draggingItem.Y:F2}) on Canvas ({canvasWidth:F2}|{canvasHeight:F2})");
+            Trace.WriteLine($"Item {draggingObject.Name} moved to ({draggingObject.X:F2}|{draggingObject.Y:F2}) on Canvas ({canvasWidth:F2}|{canvasHeight:F2})");
         }
 
         private static void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
@@ -112,7 +106,7 @@ namespace AIMarbles.Core.Behavior
             if (!(sender is FrameworkElement element)) return;
 
             element.ReleaseMouseCapture();
-            element.ClearValue(CurrentDragStateProperty); // Clear state when drag ends
+            element.ClearValue(CurrentCanvasBehaviorStateProperty); // Clear state when drag ends
             Trace.WriteLine("Drag ended.");
         }
     }

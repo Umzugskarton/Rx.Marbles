@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AIMarbles.ViewModel
+namespace AIMarbles.Core.Interface
 {
-    internal class ConnectionViewModel
+    public interface IMarbleMachineEngine
     {
     }
 }

@@ -1,71 +1,138 @@
-﻿namespace AIMarbles.Core
+﻿using AIMarbles.Core.Helpers;
+using AIMarbles.Core.Interface;
+using CommunityToolkit.Mvvm.Input;
+using Reactive.Bindings;
+using System.Diagnostics;
+using System.Reactive.Linq;
+
+namespace AIMarbles.Core
 {
-    abstract internal class CanvasObjectViewModelBase : ViewModelBase
+    public abstract partial class CanvasObjectViewModelBase : ViewModelBase
     {
+        protected readonly ICanvasObjectService _canvasObjectService;
 
         private double _x = 0;
         private double _y = 0;
-
-        private string _name = "";
+        private double _viewWidth;
+        private double _viewHeight;
         private bool _isSelected = false;
+        private string _name = "";
+        private readonly ReactiveProperty<double> _xReactive;
+        private readonly ReactiveProperty<double> _yReactive;
+        private readonly ReactiveProperty<double> _viewWidthReactive;
+        private readonly ReactiveProperty<double> _viewHeightReactive;
+        private readonly ReactiveProperty<bool> _isSelectedReactive;
+        public double ViewWidth
+        {
+            get => _viewWidth;
+            set
+            {
+                if (SetProperty(ref _viewWidth, value))
+                {
+                    _viewWidthReactive.Value = value;
+                }
+            }
+        }
 
-        private List<CanvasObjectViewModelBase> _connectedObjects = new List<CanvasObjectViewModelBase>();
+        public double ViewHeight
+        {
+            get => _viewHeight;
+            set
+            {
+                if (SetProperty(ref _viewHeight, value))
+                {
+                    _viewHeightReactive.Value = value;
+                }
+            }
+        }
+
+        public IObservable<(double viewWidht, double viewHeight)> WhenViewDimensionsChange => _viewWidthReactive.CombineLatest(
+            _viewHeightReactive, 
+            (width, height) => (Width: width, Height: height)
+        );
+
+        public IObservable<(double X, double Y)> WhenCoordinatesChange => _xReactive.CombineLatest(
+            _yReactive,
+            (x, y) => (X: x, Y: y)
+        );
+
+        [RelayCommand]
+        private void InitiateLink()
+        {
+            Trace.WriteLine($"Initiaing Link for canvasObject {Name}");
+            _canvasObjectService.EnterConnectionMode(this);
+        }
+
+        [RelayCommand]
+        private void RegisterLink()
+        {
+            Trace.WriteLine($"Registering Link with canvasObject {Name}");
+            _canvasObjectService.RegisterLink(this);
+        }
 
         //Overwride this in the derived class to set the allowed connections
-        private List<CanvasObjectViewModelBase> _allowedConnectionsList() { return new List<CanvasObjectViewModelBase>(); }
-        public CanvasObjectViewModelBase()
+        protected abstract List<Type> _allowedConnectionsList();
+        public CanvasObjectViewModelBase(ICanvasObjectService canvasObjectService)
         {
+            _canvasObjectService = canvasObjectService;
             Name = Guid.NewGuid().ToString();
-        }
-        public CanvasObjectViewModelBase(double x, double y)
-        {
-            X = x;
-            Y = y;
-            Name = Guid.NewGuid().ToString();
-        }
+            X = 0;
+            Y = 0;
 
+            _xReactive = new ReactiveProperty<double>(X);
+            _yReactive = new ReactiveProperty<double>(Y);
+            _viewWidthReactive = new ReactiveProperty<double>(0);
+            _viewHeightReactive = new ReactiveProperty<double>(0);
+            _isSelectedReactive = new ReactiveProperty<bool>(false);
+        }
         public bool IsSelected
         {
             get { return _isSelected; }
             set
             {
-                _isSelected = value;
-                OnPropertyChanged(nameof(IsSelected));
+                if (SetProperty(ref _isSelected, value)) { 
+                    _x = _xReactive.Value;
+                }
             }
         }
 
-        public List<CanvasObjectViewModelBase> ConnectedObjects
-        {
-            get { return _connectedObjects; }
-        }
-
-        public List<CanvasObjectViewModelBase> AllowedConnectionsList
+        public List<Type> AllowedConnectionsList
         {
             get { return _allowedConnectionsList(); }
         }
 
-        public void AddConnected(CanvasObjectViewModelBase item)
-        {
-            if (item == null) return;
-            if (_connectedObjects.Contains(item)) return;
-            if (!isConnectionAllowed(item)) return;
-            _connectedObjects.Add(item);
-            OnPropertyChanged(nameof(ConnectedObjects));
+        public double X { 
+            get { return _x; } 
+            set {
+                if (SetProperty(ref _x, value)) 
+                {
+                    _xReactive.Value = value;
+                }
+            } 
         }
 
-        public void RemoveConnected(CanvasObjectViewModelBase item)
-        {
-            if (item == null) return;
-            if (!_connectedObjects.Contains(item)) return;
-            _connectedObjects.Remove(item);
-            OnPropertyChanged(nameof(ConnectedObjects));
+        public double Y { 
+            get { return _y; } 
+            set {
+                if (SetProperty(ref _y, value)) 
+                {
+                    _yReactive.Value = value;
+                }
+            } 
         }
 
-        public double X { get { return _x; } set { _x = value; OnPropertyChanged(nameof(X)); } }
-        public double Y { get { return _y; } set { _y = value; OnPropertyChanged(nameof(Y)); } }
-        public string Name { get { return _name; } set { _name = value; OnPropertyChanged(nameof(Name)); } }
+        public string Name { 
+            get { return _name; } 
+            set { SetProperty(ref _name, value); } 
+        }
 
-        private bool isConnectionAllowed(CanvasObjectViewModelBase connector) { return _allowedConnectionsList().Contains(connector); }
+        public void UpdateViewDimensions(double width, double height)
+        {
+            ViewWidth = width;
+            ViewHeight = height;
+            Trace.WriteLine($"ViewModel: View dimensions updated to W:{ViewWidth}, H:{ViewHeight}");
+        }
 
+        public bool isConnectionAllowed(Type connectorType) { return AllowedConnectionsList.Contains(connectorType); }
     }
 }

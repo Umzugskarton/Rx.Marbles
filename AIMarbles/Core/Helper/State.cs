@@ -14,6 +14,7 @@ public class State<T>
 
     public T CurrentValue => _state.Value;
 
+    public IObservable<T> AsObservable() { return _state.AsObservable(); }
     public IDisposable Subscribe(Action<T> onNext)
     {
         return _state.Subscribe(onNext);

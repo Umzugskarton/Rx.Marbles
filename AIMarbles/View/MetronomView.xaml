@@ -6,9 +6,9 @@
      xmlns:local="clr-namespace:AIMarbles.View"    
      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"    
      xmlns:behavior="clr-namespace:AIMarbles.Core.Behavior" xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-             mc:Ignorable="d"    
-     Loaded="MetronomView_Loaded"         
-     SizeChanged="MetronomView_SizeChanged"
+     xmlns:helper="clr-namespace:AIMarbles.Core.Helper"
+     mc:Ignorable="d"    
+     helper:ViewDimensionHelper.PassDimensionsToViewModel="True"
      >
 
     <UserControl.Resources>
@@ -50,8 +50,8 @@
 
     </UserControl.Resources>
 
-    <Border Background="{DynamicResource MaterialDesignCardBackground}"    
-            BorderBrush="{DynamicResource MaterialDesignDivider}"    
+    <Border Background="{DynamicResource MaterialDesign.Brush.Primary.Dark.Foreground}"    
+            BorderBrush="{DynamicResource MaterialDesign.Brush.Primary}"    
             BorderThickness="1"    
             CornerRadius="30" Padding="20"    
             Effect="{StaticResource MaterialDesignShadowDepth2}">
@@ -71,7 +71,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,10" behavior:DragBehavior.IsDraggable="True">
-                    <materialDesign:PackIcon Kind="ClockOutline" VerticalAlignment="Center" Width="20" Height="20" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                    <materialDesign:PackIcon Kind="ClockOutline" VerticalAlignment="Center" Width="20" Height="20" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
                     <TextBlock Text=" Metronom" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBody}"/>
                 </StackPanel>
 
@@ -80,6 +80,7 @@
                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center"    
                             FontSize="75" FontWeight="Thin"    
                             Padding="0,5,0,0"    
+                            MaxLength="3"
                             PreviewTextInput="NumericTextBox_PreviewTextInput"    
                             TextChanged="NumericTextBox_TextChanged"    
                             Style="{StaticResource MaterialDesignFilledTextBox}"    
@@ -122,8 +123,8 @@
                 </Grid>
             </Grid>
 
-            <Border Margin="-20" CornerRadius="30" x:Name="OverlayBorder"
-                    Visibility="{Binding IsConnectionModeActive, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Margin="-18" CornerRadius="28" 
+                    Visibility="{Binding IsConnectionModeActiveByType, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="MouseLeftButtonDown">
                         <i:InvokeCommandAction Command="{Binding RegisterLinkCommand}" />
@@ -135,11 +136,8 @@
                 <Grid>
                     <materialDesign:PackIcon Kind="Link" Width="50" Height="50"
                                              HorizontalAlignment="Center" VerticalAlignment="Center"
-                                             Foreground="{DynamicResource AccentHueMidBrush}"
+                                             Foreground="White"
                                              RenderTransformOrigin="0.5,0.5">
-                        <materialDesign:PackIcon.RenderTransform>
-                            <ScaleTransform x:Name="LinkIconScaleTransform" ScaleX="0" ScaleY="0"/>
-                        </materialDesign:PackIcon.RenderTransform>
                     </materialDesign:PackIcon>
                 </Grid>
             </Border>

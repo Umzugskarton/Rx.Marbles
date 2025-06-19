@@ -10,11 +10,11 @@ namespace AIMarbles.ViewModel
 {
     public class ChannelViewModel : CanvasObjectViewModelBase
     {
-        public ChannelViewModel(ICanvasObjectService canvasObjectService) : base(canvasObjectService)
+        public ChannelViewModel(ICanvasObjectService canvasObjectService, IMarbleMachineEngine marbleMachineEngine) : base(canvasObjectService, marbleMachineEngine)
         {
         }
 
-        override protected List<Type> _allowedConnectionsList() => [typeof(OperatorViewModel), typeof(ChannelViewModel)];
+        override protected List<Type> _allowedConnectionsList() => [];
 
     }
 }

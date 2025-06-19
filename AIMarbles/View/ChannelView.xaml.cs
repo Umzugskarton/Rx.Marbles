@@ -1,18 +1,27 @@
-﻿using AIMarbles.ViewModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
 
 namespace AIMarbles.View
 {
     /// <summary>
-    /// Interaction logic for MetronomView.xaml
+    /// Interaction logic for ChannelView.xaml
     /// </summary>
-    public partial class MetronomView : UserControl
+    public partial class ChannelView : UserControl
     {
-
-        public MetronomView()
+        public ChannelView()
         {
             InitializeComponent();
         }
@@ -37,12 +46,11 @@ namespace AIMarbles.View
             if (newText == currentText) { return; }
 
             // Should already be handled by MaxLength="3" in the XAML
-            if (newText.Length > 3) { newText = newText.Substring(0, 3); }
+            if (newText.Length > 1) { newText = newText.Substring(0, 1); }
 
             int caretIndex = textBox.CaretIndex;
             textBox.Text = newText;
             textBox.CaretIndex = Math.Min(caretIndex, newText.Length);
         }
-
     }
 }

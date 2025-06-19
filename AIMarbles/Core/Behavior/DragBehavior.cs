@@ -51,10 +51,7 @@ namespace AIMarbles.Core.Behavior
                 StartPoint = e.GetPosition(element)
             };
 
-            if (VisualTreeHelperExtensions.FindParent<Canvas>(element, out Canvas? parentCanvas))
-            {
-                dragState.ParentCanvas = parentCanvas;
-            }
+            if (VisualTreeHelperExtensions.FindParent<Canvas>(element, out Canvas? parentCanvas)) { dragState.ParentCanvas = parentCanvas; }
 
             element.SetValue(CurrentCanvasBehaviorStateProperty, dragState);
             element.CaptureMouse(); // Crucial for continuous dragging even if mouse leaves element

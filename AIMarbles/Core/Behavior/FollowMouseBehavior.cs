@@ -28,28 +28,15 @@ namespace AIMarbles.Core.Behavior
         {
             base.OnAttached();
             AssociatedObject.MouseMove += OnMouseMove;
-            AssociatedObject.MouseDown += OnMouseDown;
-            AssociatedObject.MouseUp += OnMouseUp;
         }
 
         protected override void OnDetaching()
         {
             base.OnDetaching();
             AssociatedObject.MouseMove -= OnMouseMove;
-            AssociatedObject.MouseDown -= OnMouseDown;
-            AssociatedObject.MouseUp -= OnMouseUp;
         }
 
 
-        private void OnMouseDown(object sender, MouseEventArgs e)
-        {
-            if (!(sender is FrameworkElement element && element.DataContext is ConnectionViewModel item)) return;
-
-        }
-        private void OnMouseUp(object sender, MouseEventArgs e)
-        {
-            if (!(sender is FrameworkElement element && element.DataContext is ConnectionViewModel item)) return;
-        }
 
         private void OnMouseMove(object sender, MouseEventArgs e)
         {

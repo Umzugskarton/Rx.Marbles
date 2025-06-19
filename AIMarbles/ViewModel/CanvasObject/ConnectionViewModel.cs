@@ -1,5 +1,5 @@
 ﻿using AIMarbles.Core;
-using AIMarbles.Core.Helpers;
+using AIMarbles.Core.Helper;
 using AIMarbles.Core.Interface;
 using AIMarbles.Model;
 using System.Reactive.Linq;
@@ -12,12 +12,11 @@ namespace AIMarbles.ViewModel
         private double _y1 = 0;
         private double _x2 = 0;
         private double _y2 = 0;
-        private bool _isConnectionModeActive = false;
 
         private CanvasObjectViewModelBase? _from;
         private CanvasObjectViewModelBase? _to;
 
-        public ConnectionId Id { get; } 
+        public ActorId Id { get; } 
 
         // TODO Change to SetProperty
         public double X1 { get { return _x1; } set { _x1 = value; OnPropertyChanged(nameof(X1)); } }
@@ -26,8 +25,6 @@ namespace AIMarbles.ViewModel
         public double X2 { get { return _x2; } set { _x2 = value; OnPropertyChanged(nameof(X2)); } }
         public double Y2 { get { return _y2; } set { _y2 = value; OnPropertyChanged(nameof(Y2)); } }
 
-
-        public bool IsConnectionModeActive  { get { return _isConnectionModeActive; } set { _isConnectionModeActive = value; OnPropertyChanged(nameof(IsConnectionModeActive)); } }
 
         public CanvasObjectViewModelBase? From { 
             get { return _from; } 
@@ -46,28 +43,21 @@ namespace AIMarbles.ViewModel
             } 
         }
 
-        public ConnectionViewModel(ICanvasObjectService canvasObjectService)
-            : base(canvasObjectService)
+        public ConnectionViewModel(ICanvasObjectService canvasObjectService, IMarbleMachineEngine marbleMachineEngine)
+            : base(canvasObjectService, marbleMachineEngine)
         {
-            Id = new ConnectionId(Guid.NewGuid().ToString());
+            Id = new ActorId(Guid.NewGuid().ToString());
             // _animationService = new AnimationService();
             // _animationService.StartAnimation(this);
         }
 
-        protected override List<Type> _allowedConnectionsList() =>
-        [
-            typeof(ChannelViewModel),
-            typeof(NoteViewModel),
-            typeof(MetronomViewModel),
-            typeof(OperatorViewModel)
-        ];
-
+        // has no effect
+        protected override List<Type> _allowedConnectionsList() => [];
 
         private void SubscribeToFromCoordinateChanges(CanvasObjectViewModelBase? from)
         {
             if (from == null) { return;  }
             AddDisposable(
-
                 from.WhenCoordinatesChange
                 .CombineLatest(from.WhenViewDimensionsChange)
                     .Subscribe(bounds =>

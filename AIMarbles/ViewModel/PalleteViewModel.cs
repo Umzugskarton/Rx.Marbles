@@ -23,7 +23,7 @@ namespace AIMarbles.ViewModel
         [RelayCommand]
         private void AddNote()
         {
-            Trace.WriteLine("Adding Note");
+            Trace.WriteLine("Adding NoteName");
             _canvasObjectService.AddNote();
         }
 

@@ -20,6 +20,10 @@ namespace AIMarbles.ViewModel
         [ObservableProperty]
         private ConnectionViewModel? _activeConnection;
 
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(CancelConnectionModeCommand))]
+        private bool _isConnectionModeActive = false;
+
         public MainWindowViewModel
             (
                 PalleteViewModel palleteViewModel,
@@ -38,6 +42,15 @@ namespace AIMarbles.ViewModel
             _canvasObjectService.SelectCanvasObject(canvasObject);
         }
 
+        [RelayCommand]
+        private void CancelConnectionMode() {
+            _canvasObjectService.CancelConnectionMode();
+        }
+
+        private bool CanCancelConnectionMode()
+        {
+            return IsConnectionModeActive;
+        }
 
         private void SubscribeToItemsState()
         {
@@ -55,10 +68,12 @@ namespace AIMarbles.ViewModel
                         Connections = newConnections;
                     }),
 
-                    _canvasObjectService.SubscribeToActiveConnection(newConnection =>{
+                    _canvasObjectService.SubscribeToCurrentConnection(newConnection =>{
                         Trace.WriteLine($"Setting ActiveConnection to {newConnection?.Name ?? "Null"}");
                         ActiveConnection = newConnection;
                     }),
+
+                    _canvasObjectService.SubscribeToIsConnectionModeActiveState(isActive => IsConnectionModeActive = isActive  ),
                 ]
             );
         }

@@ -1,15 +1,25 @@
-﻿namespace AIMarbles.Model
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AIMarbles.Model
 {
-    public class ConnectionId
+    public abstract class BaseId
     {
         public string Id { get; }
 
-        public ConnectionId(string id)
+        public BaseId(string id)
         {
             Id = id ?? throw new ArgumentNullException(nameof(id));
         }
+        public BaseId() 
+        {
+            Id = Guid.NewGuid().ToString("N");
+        }
 
-        public bool Equals(ConnectionId other)
+        public bool Equals(BaseId other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -21,7 +31,7 @@
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((ConnectionId)obj);
+            return Equals((BaseId)obj);
         }
 
         public override int GetHashCode()
@@ -29,6 +39,5 @@
             return Id.GetHashCode();
         }
 
-        public override string ToString() => $"ConnectionId: {Id}";
     }
 }

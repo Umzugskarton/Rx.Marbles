@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-namespace AIMarbles.Core.Helpers;
+namespace AIMarbles.Core.Helper;
 
 public class State<T>
 {

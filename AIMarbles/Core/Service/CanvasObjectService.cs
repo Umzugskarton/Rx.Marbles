@@ -1,4 +1,4 @@
-﻿using AIMarbles.Core.Helpers;
+﻿using AIMarbles.Core.Helper;
 using AIMarbles.Core.Interface;
 using AIMarbles.Core.Interface.Factory;
 using AIMarbles.ViewModel;
@@ -9,29 +9,32 @@ namespace AIMarbles.Core.Service
 {
     internal class CanvasObjectService : ICanvasObjectService
     {
+        private IMarbleMachineEngine _marbleMachineEngine;
         private State<List<CanvasObjectViewModelBase>> _canvasObjectsState;
         private State<List<ConnectionViewModel>> _connectionsState;
-        private State<CanvasObjectViewModelBase?> _fromConnectorSetState;
+        private State<CanvasObjectViewModelBase?> _currentFromConnectorState;
         private IObservable<bool> _isConnectionModeActive;
 
         private readonly IViewModelFactory<ChannelViewModel> _channelViewModelFactory;
         private readonly IViewModelFactory<NoteViewModel> _noteViewModelFactory;
         private readonly IViewModelFactory<MetronomViewModel> _metronomViewModelFactory;
         private readonly IViewModelFactory<ConnectionViewModel> _connectionViewModelFactory;
-        private readonly IViewModelFactory<OperatorViewModel> _operatorViewModelFactory;
+        private readonly IViewModelFactory<DelayOperatorViewModel> _operatorViewModelFactory;
 
         public CanvasObjectService(
+            IMarbleMachineEngine marbleMachineEngine,
             IViewModelFactory<ChannelViewModel> channelViewModelFactory,
             IViewModelFactory<NoteViewModel> noteViewModelFactory,
             IViewModelFactory<MetronomViewModel> metronomViewModelFactory,
             IViewModelFactory<ConnectionViewModel> connectionViewModelFactory,
-            IViewModelFactory<OperatorViewModel> operatorViewModelFactory
+            IViewModelFactory<DelayOperatorViewModel> operatorViewModelFactory
         )
         {
+            _marbleMachineEngine = marbleMachineEngine;
             _canvasObjectsState = new State<List<CanvasObjectViewModelBase>>(new List<CanvasObjectViewModelBase>());
-            _fromConnectorSetState = new State<CanvasObjectViewModelBase?>(null);
+            _currentFromConnectorState = new State<CanvasObjectViewModelBase?>(null);
             _connectionsState = new State<List<ConnectionViewModel>>(new List<ConnectionViewModel>());
-            _isConnectionModeActive = _fromConnectorSetState.AsObservable().Select(state => state != null);
+            _isConnectionModeActive = _currentFromConnectorState.AsObservable().Select(state => state != null);
             _channelViewModelFactory = channelViewModelFactory;
             _noteViewModelFactory = noteViewModelFactory;
             _metronomViewModelFactory = metronomViewModelFactory;
@@ -46,34 +49,35 @@ namespace AIMarbles.Core.Service
 
         public void AddNote()
         {
-            var newAction = _noteViewModelFactory.Create();
-            newAction.X = 50;
-            newAction.Y = 50;
+            var newAction = CreateCanvasObject(_noteViewModelFactory);
             AddCanvasObject(newAction);
         }
 
         public void AddChannel()
         {
-            var newChannel = _channelViewModelFactory.Create();
-            newChannel.X = 50;
-            newChannel.Y = 50;
+            var newChannel = CreateCanvasObject(_channelViewModelFactory);
             AddCanvasObject(newChannel);
         }
 
         public void AddMetronom()
         {
-            var newMetronom = _metronomViewModelFactory.Create();
-            newMetronom.X = 50;
-            newMetronom.Y = 50;
+            var newMetronom = CreateCanvasObject(_metronomViewModelFactory);
             AddCanvasObject(newMetronom);
         }
 
         public void AddOperator()
         {
-            var newOperator = _operatorViewModelFactory.Create();
-            newOperator.X = 50;
-            newOperator.Y = 50;
+            
+            var newOperator = CreateCanvasObject(_operatorViewModelFactory);
             AddCanvasObject(newOperator);
+        }
+
+        private T CreateCanvasObject<T>(IViewModelFactory<T> factory) where T: CanvasObjectViewModelBase 
+        { 
+            var newObject = factory.Create();
+            newObject.X = 50;
+            newObject.Y = 50;
+            return newObject;
         }
 
         public void EnterConnectionMode(CanvasObjectViewModelBase from)
@@ -81,14 +85,25 @@ namespace AIMarbles.Core.Service
             var newConnection = _connectionViewModelFactory.Create();
             newConnection.From = from;
             AddConnection(newConnection);
-            _fromConnectorSetState.SetState(from);
+            _currentFromConnectorState.SetState(from);
+        }
+
+        public void CancelConnectionMode()
+        {
+            var fromConnector = _currentFromConnectorState.CurrentValue;
+            if(fromConnector == null) { return; }
+            var newList = _connectionsState.CurrentValue.ToList();
+            if(newList.Count <= 0) { return; }
+            newList.RemoveAt(newList.Count - 1);
+            _connectionsState.SetState(newList);
+            _currentFromConnectorState.SetState(null);
         }
 
         public void RegisterLink(CanvasObjectViewModelBase to)
         {
             var newConnection = _connectionsState.CurrentValue.Last();
             newConnection.To = to;
-            _fromConnectorSetState.SetState(null);
+            _currentFromConnectorState.SetState(null);
         }
 
         public void RemoveSelectedCanvasObjects()
@@ -145,16 +160,22 @@ namespace AIMarbles.Core.Service
             newList.Add(connection);
             _connectionsState.SetState(newList);
         }
+
         public IDisposable SubscribeToCanvasObjectsState(Action<List<CanvasObjectViewModelBase>> onChange)
               => _canvasObjectsState.Subscribe(onChange);
 
-        public IDisposable SubscribeToActiveConnection(Action<ConnectionViewModel?> onChange) 
+        public IDisposable SubscribeToCurrentConnection(Action<ConnectionViewModel?> onChange) 
             => _isConnectionModeActive
             .Select(isActive => isActive ? _connectionsState.CurrentValue.LastOrDefault() : null)
             .Subscribe(onChange);
 
+        public IDisposable SubscribeToIsConnectionModeActiveByTypeState(Type ToConnectorType, Action<bool> onChange)
+            => _currentFromConnectorState.AsObservable()
+            .Select(fromConnector => fromConnector?.isConnectionAllowed(ToConnectorType) ?? false).Subscribe(onChange);
+
         public IDisposable SubscribeToIsConnectionModeActiveState(Action<bool> onChange)
-            => _isConnectionModeActive.Subscribe(onChange);
+            => _currentFromConnectorState.AsObservable()
+            .Select(fromConnector => fromConnector != null).Subscribe(onChange);
 
         public IDisposable SubscribeToConnectionsState(Action<List<ConnectionViewModel>> onChange)
             => _connectionsState.Subscribe(onChange);

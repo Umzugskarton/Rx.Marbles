@@ -31,5 +31,16 @@ namespace AIMarbles
             DataContext = viewModel;
         }
 
+        private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (this.DataContext is not MainWindowViewModel viewModel)
+            {
+                return;
+            }
+            if (!viewModel.CancelConnectionModeCommand.CanExecute(null)) { return;  }
+            // Execute the command
+            viewModel.CancelConnectionModeCommand.Execute(null);
+        }
+
     }
 }

@@ -10,10 +10,7 @@ namespace AIMarbles.ViewModel
 {
     public class NoteViewModel: CanvasObjectViewModelBase
     {
-        public NoteViewModel(ICanvasObjectService canvasObjectService) : base(canvasObjectService)
-        {
-        }
-
-        protected override List<Type> _allowedConnectionsList() => [typeof(OperatorViewModel), typeof(ChannelViewModel)];
+        protected override List<Type> _allowedConnectionsList() => [typeof(DelayOperatorViewModel), typeof(ChannelViewModel)];
+        public NoteViewModel(ICanvasObjectService canvasObjectService, IMarbleMachineEngine marbleMachineEngine) : base(canvasObjectService, marbleMachineEngine) { }
     }
 }

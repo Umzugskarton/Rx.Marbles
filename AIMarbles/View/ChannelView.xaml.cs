@@ -24,6 +24,8 @@ namespace AIMarbles.View
         public ChannelView()
         {
             InitializeComponent();
+
+            this.Unloaded += ChannelView_Unloaded;
         }
         private void NumericTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
@@ -33,6 +35,16 @@ namespace AIMarbles.View
         private static bool IsTextAllowed(string text)
         {
             return Regex.IsMatch(text, "[0-9]");
+        }
+
+        private void ChannelView_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Dispose of the ViewModel when the View is unloaded
+            // This is crucial for cleaning up Rx.NET subscriptions and preventing memory leaks.
+            if (DataContext is IDisposable disposableViewModel)
+            {
+                disposableViewModel.Dispose();
+            }
         }
 
         private void NumericTextBox_TextChanged(object sender, TextChangedEventArgs e)

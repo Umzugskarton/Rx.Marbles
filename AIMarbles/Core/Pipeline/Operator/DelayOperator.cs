@@ -13,7 +13,7 @@ namespace AIMarbles.Core.Pipeline.Operator
         public ActorId ActorId => _actorId;
         public string Name => $"Delay {_actorId.ToString()}:::{_delayState.CurrentValue}";
 
-        public DelayOperator(State<TimeSpan> delayState, ActorId actorId)
+        public DelayOperator(ActorId actorId, State<TimeSpan> delayState)
         {
             _delayState = delayState;
             _actorId = actorId;

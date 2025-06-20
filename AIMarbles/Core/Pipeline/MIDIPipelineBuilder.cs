@@ -18,7 +18,7 @@ namespace AIMarbles.Core.Pipeline
         /// <summary>
         /// Builds and returns the final IObservable<MIDIMarble> sequence.
         /// </summary>
-        public MIDIPipelineBuilder Build()
+        public IObservable<MIDIMarble> Build()
         {
             _currentObservable ??= Observable.Empty<MIDIMarble>(); // Initialize if null
 
@@ -32,7 +32,7 @@ namespace AIMarbles.Core.Pipeline
                 _currentObservable = item.Apply(_currentObservable);
             }
 
-            return this;
+            return _currentObservable;
         }
 
         /// <summary>
@@ -45,6 +45,5 @@ namespace AIMarbles.Core.Pipeline
             _operators.Add(midiOperator);
             return this;
         }
-
     }
 }

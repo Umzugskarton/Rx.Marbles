@@ -10,6 +10,7 @@ using System.Xml.Serialization;
 
 namespace AIMarbles.Core
 {
+    // TODO tear this class down into smaller components
     public abstract partial class CanvasObjectViewModelBase : ViewModelBase
     {
         protected readonly ICanvasObjectService _canvasObjectService;

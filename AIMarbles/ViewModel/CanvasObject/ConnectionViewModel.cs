@@ -46,7 +46,7 @@ namespace AIMarbles.ViewModel
         public ConnectionViewModel(ICanvasObjectService canvasObjectService, IMarbleMachineEngine marbleMachineEngine)
             : base(canvasObjectService, marbleMachineEngine)
         {
-            Id = new ActorId(Guid.NewGuid().ToString());
+            Id = new ActorId();
             // _animationService = new AnimationService();
             // _animationService.StartAnimation(this);
         }

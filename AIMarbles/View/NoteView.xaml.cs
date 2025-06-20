@@ -28,15 +28,28 @@ namespace AIMarbles.View
             RegexOptions.IgnoreCase | RegexOptions.Compiled 
         );
 
-        private static NoteName currentNote;
         public NoteView()
         {
             InitializeComponent();
+
+            this.Unloaded += NoteView_Unloaded;
+
         }
+
         private void MusicNoteTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             if (sender is not TextBox textBox) { return; }
             e.Handled = !IsTextAllowed(String.Concat(textBox.Text, e.Text));
+        }
+
+        private void NoteView_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Dispose of the ViewModel when the View is unloaded
+            // This is crucial for cleaning up Rx.NET subscriptions and preventing memory leaks.
+            if (DataContext is IDisposable disposableViewModel)
+            {
+                disposableViewModel.Dispose();
+            }
         }
 
         private static bool IsTextAllowed(string text)

@@ -8,5 +8,6 @@ namespace AIMarbles.Core.Interface
 {
     public interface IMarbleMachineEngine
     {
+        void Dispose();
     }
 }

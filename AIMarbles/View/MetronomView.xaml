@@ -7,11 +7,14 @@
      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"    
      xmlns:behavior="clr-namespace:AIMarbles.Core.Behavior" xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
      xmlns:helper="clr-namespace:AIMarbles.Core.Helper"
+     xmlns:enum="clr-namespace:AIMarbles.Model.Enum"    
+     xmlns:converter="clr-namespace:AIMarbles.Core.Converter"
      mc:Ignorable="d"    
      helper:ViewDimensionHelper.PassDimensionsToViewModel="True"
      >
 
     <UserControl.Resources>
+        <converter:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
 
         <Style TargetType="RadioButton">
             <Setter Property="GroupName" Value="NoteDuration"/>
@@ -76,7 +79,7 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
-                    <TextBox Text="{Binding BPM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    
+                    <TextBox Text="{Binding Bpm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"    
                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center"    
                             FontSize="75" FontWeight="Thin"    
                             Padding="0,5,0,0"    
@@ -99,14 +102,20 @@
 
                 <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Vertical" Margin="0,15,0,10">
                     <UniformGrid Columns="6">
-                        <RadioButton Content="1/1" GroupName="NoteDuration" IsChecked="True"/>
-                        <RadioButton Content="1/2" GroupName="NoteDuration"/>
-                        <RadioButton Content="1/4" GroupName="NoteDuration"/>
-                        <RadioButton Content="1/8" GroupName="NoteDuration"/>
-                        <RadioButton Content="1/16" GroupName="NoteDuration"/>
-                        <RadioButton Content="1/32" GroupName="NoteDuration"/>
+                        <RadioButton Content="4/4" GroupName="TimeSignatureSelection"
+                     IsChecked="{Binding SelectedTimeSignature, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static enum:TimeSignature.CommonTime_4_4}}"/>
+                        <RadioButton Content="2/2" GroupName="TimeSignatureSelection"
+                     IsChecked="{Binding SelectedTimeSignature, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static enum:TimeSignature.CutTime_2_2}}"/>
+                        <RadioButton Content="3/4" GroupName="TimeSignatureSelection"
+                     IsChecked="{Binding SelectedTimeSignature, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static enum:TimeSignature.ThreeFour}}"/>
+                        <RadioButton Content="6/8" GroupName="TimeSignatureSelection"
+                     IsChecked="{Binding SelectedTimeSignature, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static enum:TimeSignature.SixEight}}"/>
+                        <RadioButton Content="2/4" GroupName="TimeSignatureSelection"
+                     IsChecked="{Binding SelectedTimeSignature, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static enum:TimeSignature.TwoFour}}"/>
+                        <RadioButton Content="5/4" GroupName="TimeSignatureSelection"
+                     IsChecked="{Binding SelectedTimeSignature, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static enum:TimeSignature.FiveFour}}"/>
                     </UniformGrid>
-                    <TextBlock Text="Note Duration" HorizontalAlignment="Left" Margin="0,5,0,0" FontSize="10" Foreground="{DynamicResource MaterialDesignBody}"/>
+                    <TextBlock Text="Time Signature" HorizontalAlignment="Left" Margin="0,5,0,0" FontSize="10" Foreground="{DynamicResource MaterialDesignBody}"/>
                 </StackPanel>
 
                 <Separator Grid.Row="3" Grid.ColumnSpan="2" Margin="-20, 0, -20, 5"/>

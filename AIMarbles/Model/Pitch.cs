@@ -23,7 +23,7 @@ namespace AIMarbles.Model
             return $"{Note}{Octave}"; // e.g., C4, GSharp3
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Pitch other &&
                    Note == other.Note &&
@@ -61,6 +61,11 @@ namespace AIMarbles.Model
 
             return new Pitch(newNote, newOctave);
         }
-    }
 
+        public Pitch Copy()
+        {
+            return new Pitch(Note, Octave);
+        }
+
+    }
 }

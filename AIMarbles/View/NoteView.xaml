@@ -9,13 +9,11 @@
              xmlns:helper="clr-namespace:AIMarbles.Core.Helper"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d"
-             Width="200" Height="250"
-             helper:ViewDimensionHelper.PassDimensionsToViewModel="True"
-             >
+             Width="230" Height="270"
+             helper:ViewDimensionHelper.PassDimensionsToViewModel="True">
 
     <UserControl.Resources>
 
-        <!-- Style for the small increment/decrement buttons -->
         <Style x:Key="UpDownButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
             <Setter Property="Width" Value="30"/>
             <Setter Property="Height" Value="20"/>
@@ -29,15 +27,15 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" 
+                        <Border x:Name="border"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="{Binding Path=(materialDesign:ButtonAssist.CornerRadius), RelativeSource={RelativeSource Mode=TemplatedParent}}">
                             <materialDesign:Ripple Feedback="{TemplateBinding Foreground}"
-                                                  HorizontalAlignment="Stretch"
-                                                  VerticalAlignment="Stretch"
-                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+                                                   HorizontalAlignment="Stretch"
+                                                   VerticalAlignment="Stretch"
+                                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
                                 <ContentPresenter x:Name="contentPresenter"
                                                   ContentTemplate="{TemplateBinding ContentTemplate}"
                                                   Content="{TemplateBinding Content}"
@@ -66,6 +64,60 @@
             </Setter>
         </Style>
 
+        <Style x:Key="OctaveUpDownButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Background" Value="{DynamicResource PrimaryHueLightBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryHueLightBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkBrush}"/>
+            <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{Binding Path=(materialDesign:ButtonAssist.CornerRadius), RelativeSource={RelativeSource Mode=TemplatedParent}}">
+                            <materialDesign:Ripple Feedback="{TemplateBinding Foreground}"
+                                                   HorizontalAlignment="Stretch"
+                                                   VerticalAlignment="Stretch"
+                                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+                                <ContentPresenter x:Name="contentPresenter"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </materialDesign:Ripple>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPaper}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource PrimaryHueDarkBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryHueDarkBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPaper}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
         <DropShadowEffect x:Key="ModuleDropShadow" BlurRadius="10" ShadowDepth="5" Opacity="0.2" Direction="270" Color="Black"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
@@ -81,87 +133,92 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <!-- Title/Icon -->
                     <RowDefinition Height="Auto"/>
-                    <!-- Note Input -->
                     <RowDefinition Height="Auto"/>
-                    <!-- "Note" Label -->
                     <RowDefinition Height="Auto"/>
-                    <!-- Separator -->
                     <RowDefinition Height="Auto"/>
-                    <!-- Bottom Row (Link, Up/Down, Output) -->
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Title Section -->
-                <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,10" 
+                <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,10"
                             behavior:DragBehavior.IsDraggable="True"
                             HorizontalAlignment="Left">
                     <materialDesign:PackIcon Kind="MusicNote" VerticalAlignment="Center" Width="20" Height="20" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
                     <TextBlock Text="Note" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBody}"/>
                 </StackPanel>
 
-                <!-- Note Input Section -->
-                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,0,0" HorizontalAlignment="Center">
-                    <Border CornerRadius="15" Background="{DynamicResource PrimaryHueLightBrush}" Padding="10 0">
-                        <TextBox Text="{Binding NoteValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,0" HorizontalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" CornerRadius="15" Background="{DynamicResource PrimaryHueLightBrush}" Padding="10 0" Margin="0,0,10,0">
+                        <TextBox Text="{Binding NoteName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                  FontSize="60" FontWeight="Thin"
-                                 Width="100" Height="90"
+                                 Width="100" Height="100"
                                  Background="Transparent"
                                  BorderThickness="0"
                                  Foreground="{DynamicResource PrimaryHueDarkBrush}"
                                  CaretBrush="{DynamicResource PrimaryHueDarkBrush}"
-                                PreviewTextInput="MusicNoteTextBox_PreviewTextInput"    
+                                 PreviewTextInput="MusicNoteTextBox_PreviewTextInput"    
                                  materialDesign:TextFieldAssist.HasClearButton="False"
                                  Style="{StaticResource MaterialDesignTextBox}"
                                  AcceptsReturn="False" AcceptsTab="False"
-                                 MaxLength="2"/>
+                                 MaxLength="3"/>
                     </Border>
-                </StackPanel>
 
-                <!-- "Note" Label -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Button Command="{Binding IncrementOctaveCommand}"
+                                Style="{DynamicResource MaterialDesignOutlinedDarkButton}"
+                                materialDesign:ButtonAssist.CornerRadius="5 5 0 0" >
+                            <materialDesign:PackIcon Kind="ArrowDropUp" Width="20" Height="20"/>
+                        </Button>
+                        <Border Background="{DynamicResource PrimaryHueLightBrush}"
+                                BorderBrush="{DynamicResource MaterialDesign.Brush.Primary.Dark}"
+                                BorderThickness="1 0 1 0" Padding="5">
+                            <TextBlock Text="{Binding Octave}"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center"
+                                       FontWeight="SemiBold" FontSize="20"
+                                       Height="30"
+                                       Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                        </Border>
+                        <Button Command="{Binding DecrementOctaveCommand}"
+                                Style="{DynamicResource MaterialDesignOutlinedDarkButton}"
+                                materialDesign:ButtonAssist.CornerRadius="0 0 5 5">
+                            <materialDesign:PackIcon Kind="ArrowDropDown" Width="20" Height="20"/>
+                        </Button>
+                        <TextBlock Text="Octave" HorizontalAlignment="Center" Margin="0,5,0,0" FontSize="10" Foreground="{DynamicResource MaterialDesignBody}"/>
+                    </StackPanel>
+                </Grid>
+
                 <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="Note" HorizontalAlignment="Left" Margin="0,5,0,10" FontSize="10" Foreground="{DynamicResource MaterialDesignBody}"/>
 
-                <!-- Separator -->
                 <Separator Grid.Row="3" Grid.ColumnSpan="2" Margin="-20, 0, -20, 5"/>
 
-                <!-- Bottom Row: Link, Up/Down, Output -->
                 <Grid Grid.Row="4" Grid.ColumnSpan="2" Margin="0,5,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
-                        <!-- Link Button -->
                         <ColumnDefinition Width="*"/>
-                        <!-- Spacer / Up/Down Buttons -->
                         <ColumnDefinition Width="Auto"/>
-                        <!-- Output Port -->
                     </Grid.ColumnDefinitions>
 
-                    <!-- Link Button -->
                     <Button Content="Link" Grid.Column="0" Command="{Binding InitiateLinkCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" />
 
-                    <!-- Up/Down Buttons and Octave Offset -->
-                    <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,0">
-                        <Button Style="{StaticResource UpDownButtonStyle}" Command="{Binding DecreaseOctaveCommand}">
+                    <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Button Style="{StaticResource UpDownButtonStyle}" Command="{Binding IncrementOctaveCommand}" Visibility="Collapsed">
                             <materialDesign:PackIcon Kind="ArrowDropDown" Width="20" Height="20"/>
                         </Button>
-                        <Border Background="{DynamicResource MaterialDesignBackground}" 
-                                CornerRadius="5" Padding="5 2" Margin="5 0"
-                                BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1">
-                            <TextBlock Text="{Binding OctaveOffset, StringFormat={}{0}}" 
-                                       VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                       FontWeight="SemiBold" FontSize="12"
-                                       Foreground="{DynamicResource MaterialDesignBody}"/>
-                        </Border>
-                        <Button Style="{StaticResource UpDownButtonStyle}" Command="{Binding IncreaseOctaveCommand}">
+                        <Button Style="{StaticResource UpDownButtonStyle}" Command="{Binding DecrementOctaveCommand}" Visibility="Collapsed">
                             <materialDesign:PackIcon Kind="ArrowDropUp" Width="20" Height="20"/>
                         </Button>
                     </StackPanel>
 
-                    <!-- Output Port -->
+
                     <Border Grid.Column="2" Width="28" Height="28" CornerRadius="14" Background="{DynamicResource SecondaryHueMidBrush}" Margin="10,0,0,0"
                             ToolTipService.ToolTip="Note Output" HorizontalAlignment="Right" VerticalAlignment="Center">
                         <materialDesign:PackIcon Kind="LinkVariant" Width="18" Height="18" Foreground="{DynamicResource MaterialDesignBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -169,7 +226,6 @@
                 </Grid>
             </Grid>
 
-            <!-- Connection Overlay -->
             <Border Margin="-18" CornerRadius="28"
                     Visibility="{Binding IsConnectionModeActiveByType, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <i:Interaction.Triggers>

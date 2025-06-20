@@ -8,6 +8,7 @@ using AIMarbles.Core.Pipeline.Operator;
 using AIMarbles.Extension;
 using AIMarbles.Model;
 using AIMarbles.ViewModel;
+using AIMarbles.ViewModel.CanvasObject;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,29 +25,35 @@ namespace AIMarbles.Core.Service
     public class MarbleMachineManager : IMarbleMachineManager
     {
 
-        private IDictionary<Type, Type> _translateMarbleTypes = new Dictionary<Type, Type>()
+        // Lieber doch States dann können wir auf einzelne pipeline änderungen direkt subscriben
+        private ObservableRxDictionary<SequenceId, MIDIPipelineBuilder> _readyPipes;
+        private readonly IDictionary<Type, Type> _translateMarbleTypes = new Dictionary<Type, Type>()
         {
             { typeof(MetronomViewModel), typeof(MetronomMarbleConductor) },
             { typeof(DelayOperatorViewModel), typeof(DelayOperator) },
-            { typeof(DelayOperatorViewModel), typeof(TransposeOperator) },
+            { typeof(TransposeOperatorViewModel), typeof(TransposeOperator) },
             { typeof(ChannelViewModel), typeof(ChannelSelectOperator) },
             { typeof(NoteViewModel), typeof(NoteSelectOperator) },
         };
 
-        private ObservableRxDictionary<SequenceId, MIDIPipelineBuilder> _readyPipes;
-
         private IDictionary<SequenceId, LinkedList<IMarbleMachineActor>> _sequences;
-        private IDictionary<ActorId, List<SequenceId>> _actorToSequences;
+        private IDictionary<ActorId, HashSet<SequenceId>> _actorInSequences;
 
         private IDictionary<ActorId, IMarbleMachineActor> _actors;
         public MarbleMachineManager()
         {
             _actors = new Dictionary<ActorId, IMarbleMachineActor>();
             _sequences = new Dictionary<SequenceId, LinkedList<IMarbleMachineActor>>();
-            _actorToSequences = new Dictionary<ActorId, List<SequenceId>>();
+            _actorInSequences = new Dictionary<ActorId, HashSet<SequenceId>>();
             _readyPipes = new ObservableRxDictionary<SequenceId, MIDIPipelineBuilder>();
         }
 
+
+        /// <summary>
+        /// Regosters an actor with the manager. The actor is created from the given view model type.
+        /// </summary>
+        /// <param name="viewModel"></param>
+        /// <returns>bool, true if succeeded, False if not</returns>
         public bool registerActor(CanvasObjectViewModelBase viewModel)
         {
             if (_actors.ContainsKey(viewModel.ActorId))
@@ -76,6 +83,12 @@ namespace AIMarbles.Core.Service
             return true;
         }
 
+        /// <summary>
+        /// Registers all resulting sequences for a connection between two actors and/or their already present sequence.
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
         public bool RegisterConnection(CanvasObjectViewModelBase from, CanvasObjectViewModelBase to)
         {
             _actors.TryGetValue(from.ActorId, out IMarbleMachineActor? fromActor);
@@ -89,7 +102,7 @@ namespace AIMarbles.Core.Service
 
             List<Sequence> beforeSequences = GetAllBefore(fromActor);
             List<Sequence> afterSequences = GetAllAfter(toActor);
-            List<SequenceId> updatedAndCreatedIds = new List<SequenceId>();
+            HashSet<SequenceId> updatedAndCreatedIds = new HashSet<SequenceId>();
 
             //Update all sequences that are before the 'from' actor to include the first 'to' actor sequence
             beforeSequences.ForEach((tuple) =>
@@ -107,12 +120,62 @@ namespace AIMarbles.Core.Service
                 beforeSequences.ForEach((tuple) =>
                 {
                     LinkedList<IMarbleMachineActor> newSequence = new(tuple.sequence.Concat(sequence.sequence));
-                    _sequences.Add(new SequenceId(), newSequence);
-                    updatedAndCreatedIds.Add(tuple.id);
+                    var newSequenceId = new SequenceId();
+                    _sequences.Add(newSequenceId, newSequence);
+                    updatedAndCreatedIds.Add(newSequenceId);
                 });
             }
 
-            CheckAndBuildPipe(updatedAndCreatedIds);
+            _actorInSequences[from.ActorId] = updatedAndCreatedIds;
+            _actorInSequences[to.ActorId] = updatedAndCreatedIds;
+
+            CheckAndBuildPipe(updatedAndCreatedIds.ToList());
+
+            return true;
+        }
+
+        public bool ReleaseConnection(CanvasObjectViewModelBase from, CanvasObjectViewModelBase to)
+        {
+
+            _actors.TryGetValue(from.ActorId, out IMarbleMachineActor? fromActor);
+            _actors.TryGetValue(to.ActorId, out IMarbleMachineActor? toActor);
+
+            if (fromActor == null || toActor == null)
+            {
+                Trace.WriteLine($"Actor not found for connection from {from.ActorId} to {to.ActorId}");
+                return false;
+            }
+
+            List<SequenceId> sequencesToUpdate = new List<SequenceId>();
+
+            // Very unperformant // refactor to use actorInSequences perhaps
+            _sequences.Where(sequence =>
+                {
+                    var fromActorEntry = sequence.Value.Find(fromActor);
+                    return fromActorEntry?.Next?.Value is IMarbleMachineActor nextActor && nextActor.ActorId == toActor.ActorId;
+
+                })
+                .ToList()
+                .ForEach(sequence =>
+                {
+                    var oldSequence = _sequences[sequence.Key];
+                    var fromSequence = oldSequence.GetAllBefore(fromActor);
+                    var toSequence = oldSequence.GetAllAfter(toActor);
+
+                    if (_actorInSequences[from.ActorId].Count > 1)
+                    {
+                        _sequences.Remove(sequence.Key);
+                    }
+                    else
+                    {
+                        _sequences[sequence.Key] = fromSequence;
+                    }
+
+                    var newSequenceId = new SequenceId();
+                    _sequences.Add(newSequenceId, toSequence);
+
+                });
+
 
             return true;
         }
@@ -134,8 +197,7 @@ namespace AIMarbles.Core.Service
                     .Select(actor => actor as IMarbleOperator)
                     .ToList();
 
-                var marblePipe = new MIDIPipelineBuilder(marbleMachineConductor, marbleOperators)
-                    .Build();
+                var marblePipe = new MIDIPipelineBuilder(marbleMachineConductor, marbleOperators);
 
                 _readyPipes[sequence.id] = marblePipe;
             }
@@ -159,7 +221,7 @@ namespace AIMarbles.Core.Service
             List<Sequence> newSequences = new List<Sequence>();
 
 
-            if (!_actorToSequences.TryGetValue(actor.ActorId, out List<SequenceId>? sequencesFrom))
+            if (!_actorInSequences.TryGetValue(actor.ActorId, out HashSet<SequenceId>? sequencesFrom))
             {
                 // Adds the source actor as a new sequence
                 var newSequence = new LinkedList<IMarbleMachineActor>();
@@ -176,9 +238,23 @@ namespace AIMarbles.Core.Service
             return newSequences;
         }
 
-        public IDisposable SubscribeToPipelineChanges(Action<IDictionary<SequenceId, MIDIPipelineBuilder>> onChange) => 
+        public IDisposable SubscribeToAllPipeChanges(Action<IDictionary<SequenceId, MIDIPipelineBuilder>> onChange) =>
             _readyPipes.DictionaryChanged
                 .Subscribe(onChange);
 
+        public IDisposable SubscribeToPipeCreations(Action<DictionaryAddEventArgs<SequenceId, MIDIPipelineBuilder>> onChange)
+        {
+            return _readyPipes.Added.Subscribe(onChange);
+        }
+
+        public IDisposable SubscribeToPipeRemovals(Action<DictionaryRemoveEventArgs<SequenceId, MIDIPipelineBuilder>> onChange)
+        {
+            return _readyPipes.Removed.Subscribe(onChange);
+        }
+
+        public IDisposable SubscribeToPipeUpdates(Action<DictionaryReplaceEventArgs<SequenceId, MIDIPipelineBuilder>> onChange)
+        {
+            return _readyPipes.Replaced.Subscribe(onChange);
+        }
     }
 }

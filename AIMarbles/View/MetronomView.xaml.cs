@@ -15,10 +15,22 @@ namespace AIMarbles.View
         public MetronomView()
         {
             InitializeComponent();
+
+            this.Unloaded += MetronomView_Unloaded;
         }
         private void NumericTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsTextAllowed(e.Text);
+        }
+
+        private void MetronomView_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Dispose of the ViewModel when the View is unloaded
+            // This is crucial for cleaning up Rx.NET subscriptions and preventing memory leaks.
+            if (DataContext is IDisposable disposableViewModel)
+            {
+                disposableViewModel.Dispose();
+            }
         }
 
         private static bool IsTextAllowed(string text)

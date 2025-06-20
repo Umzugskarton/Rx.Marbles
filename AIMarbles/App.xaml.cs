@@ -3,6 +3,7 @@ using AIMarbles.Core.Factory;
 using AIMarbles.Core.Helper;
 using AIMarbles.Core.Interface;
 using AIMarbles.Core.Interface.Factory;
+using AIMarbles.Core.Interface.Service;
 using AIMarbles.Core.Service;
 using AIMarbles.View;
 using AIMarbles.ViewModel;
@@ -38,6 +39,8 @@ namespace AIMarbles
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<ICanvasObjectService, CanvasObjectService>(); 
+            services.AddSingleton<IMarbleMachineManager, MarbleMachineManager>(); 
+            services.AddSingleton<IMidiOutputService, MIDIOutputService>(); 
             services.AddSingleton<IMarbleMachineEngine, MarbleMachineEngine>(); 
 
             services.AddSingleton<MainWindowViewModel>();

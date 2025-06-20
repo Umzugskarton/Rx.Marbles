@@ -1,6 +1,7 @@
 ﻿using AIMarbles.Core.Helper;
 using AIMarbles.Core.Interface;
 using AIMarbles.Core.Interface.Factory;
+using AIMarbles.Core.Interface.Service;
 using AIMarbles.ViewModel;
 using System.Diagnostics;
 using System.Reactive.Linq;
@@ -9,7 +10,7 @@ namespace AIMarbles.Core.Service
 {
     internal class CanvasObjectService : ICanvasObjectService
     {
-        private IMarbleMachineEngine _marbleMachineEngine;
+        private IMarbleMachineManager _marbleMachineManager;
         private State<List<CanvasObjectViewModelBase>> _canvasObjectsState;
         private State<List<ConnectionViewModel>> _connectionsState;
         private State<CanvasObjectViewModelBase?> _currentFromConnectorState;
@@ -22,7 +23,7 @@ namespace AIMarbles.Core.Service
         private readonly IViewModelFactory<DelayOperatorViewModel> _operatorViewModelFactory;
 
         public CanvasObjectService(
-            IMarbleMachineEngine marbleMachineEngine,
+            IMarbleMachineManager marbleMachineManager,
             IViewModelFactory<ChannelViewModel> channelViewModelFactory,
             IViewModelFactory<NoteViewModel> noteViewModelFactory,
             IViewModelFactory<MetronomViewModel> metronomViewModelFactory,
@@ -30,7 +31,7 @@ namespace AIMarbles.Core.Service
             IViewModelFactory<DelayOperatorViewModel> operatorViewModelFactory
         )
         {
-            _marbleMachineEngine = marbleMachineEngine;
+            _marbleMachineManager = marbleMachineManager;
             _canvasObjectsState = new State<List<CanvasObjectViewModelBase>>(new List<CanvasObjectViewModelBase>());
             _currentFromConnectorState = new State<CanvasObjectViewModelBase?>(null);
             _connectionsState = new State<List<ConnectionViewModel>>(new List<ConnectionViewModel>());
@@ -50,6 +51,7 @@ namespace AIMarbles.Core.Service
         public void AddNote()
         {
             var newAction = CreateCanvasObject(_noteViewModelFactory);
+            _marbleMachineManager.(newAction);
             AddCanvasObject(newAction);
         }
 

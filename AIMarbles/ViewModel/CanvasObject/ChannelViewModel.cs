@@ -1,20 +1,40 @@
 ﻿using AIMarbles.Core;
+using AIMarbles.Core.Helper;
 using AIMarbles.Core.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AIMarbles.Extension;
+using CommunityToolkit.Mvvm.ComponentModel;
+using System.Diagnostics;
 
 namespace AIMarbles.ViewModel
 {
-    public class ChannelViewModel : CanvasObjectViewModelBase
+    public partial class ChannelViewModel : CanvasObjectViewModelBase
     {
-        public ChannelViewModel(ICanvasObjectService canvasObjectService, IMarbleMachineEngine marbleMachineEngine) : base(canvasObjectService, marbleMachineEngine)
-        {
-        }
+        [ObservableProperty]
+        private int _channelValue;
+
+
+        public State<int> ChannelState = new State<int>(0);
 
         override protected List<Type> _allowedConnectionsList() => [];
+        public ChannelViewModel(
+            ICanvasObjectService canvasObjectService,
+            IMarbleMachineEngine marbleMachineEngine
+            ) : base(canvasObjectService, marbleMachineEngine)
+        {
+            SubscribeToChannelValueChanges();
+        }
+            
+        private void SubscribeToChannelValueChanges()
+        {
+            AddDisposables([
+                this.ObserveProperty(vm => vm.ChannelValue)
+                    .Subscribe(value =>
+                    {
+                        ChannelState.SetState(value);
+                        Trace.WriteLine($"ViewModel: Channel value changed to: {value}");
+                    })
+            ]);
+        }
 
     }
 }

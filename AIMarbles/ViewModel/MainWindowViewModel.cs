@@ -1,84 +1,81 @@
 ﻿using AIMarbles.Core;
-using AIMarbles.Core.Service;
+using AIMarbles.Core.Interface;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
 
 namespace AIMarbles.ViewModel
 {
-    internal partial class MainWindowViewModel : ViewModelBase
-   {
-        private readonly CanvasObjectService _canvasObjectService;
+    public partial class MainWindowViewModel : ViewModelBase
+    {
+        public PalleteViewModel PalleteVM { get; }
+        private readonly ICanvasObjectService _canvasObjectService;
 
         [ObservableProperty]
-        public IEnumerable<CanvasObjectViewModelBase> _items = new List<CanvasObjectViewModelBase>();
+        private IEnumerable<CanvasObjectViewModelBase> _items = new List<CanvasObjectViewModelBase>();
 
         [ObservableProperty]
-        private CanvasObjectViewModelBase? _selectedDraggableItem;
+        private IEnumerable<ConnectionViewModel> _connections = new List<ConnectionViewModel>();
 
-        public MainWindowViewModel(CanvasObjectService canvasObjectService) {
+        [ObservableProperty]
+        private ConnectionViewModel? _activeConnection;
+
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(CancelConnectionModeCommand))]
+        private bool _isConnectionModeActive = false;
+
+        public MainWindowViewModel
+            (
+                PalleteViewModel palleteViewModel,
+                ICanvasObjectService canvasObjectService
+            )
+        {
+            PalleteVM = palleteViewModel;
             _canvasObjectService = canvasObjectService;
             SubscribeToItemsState();
         }
 
         [RelayCommand]
-        private void AddAction()
+        private void SelectItem(CanvasObjectViewModelBase canvasObject)
         {
-            _canvasObjectService.AddAction();
+            Trace.WriteLine($"Selecting canvasObject {canvasObject.Name}");
+            _canvasObjectService.SelectCanvasObject(canvasObject);
         }
 
         [RelayCommand]
-        private void AddTrigger()
-        {
-            _canvasObjectService.AddTrigger();
+        private void CancelConnectionMode() {
+            _canvasObjectService.CancelConnectionMode();
         }
 
-        [RelayCommand]
-        private void AddOperator()
+        private bool CanCancelConnectionMode()
         {
-            _canvasObjectService.AddOperator();
-        }
-
-        [RelayCommand]
-        private void SelectItem(CanvasObjectViewModelBase item)
-        {
-            if (item == null) return;
-
-            if(SelectedDraggableItem == item)
-            {
-                SelectedDraggableItem.IsSelected = false;
-                SelectedDraggableItem = null;
-                return;
-            }
-            if (SelectedDraggableItem != null && SelectedDraggableItem != item)
-            {
-                SelectedDraggableItem.IsSelected = false;
-            }
-
-            SelectedDraggableItem = item;
-            SelectedDraggableItem.IsSelected = true;
-            Trace.WriteLine($"Selected: {SelectedDraggableItem.Name}");
-        }
-
-        [RelayCommand]
-        private void RemoveItem()
-        {
-            if (SelectedDraggableItem == null) {
-                return;
-            }
-
-            _canvasObjectService.RemoveCanvasObject(SelectedDraggableItem);
+            return IsConnectionModeActive;
         }
 
         private void SubscribeToItemsState()
         {
-            AddDisposable(
-                _canvasObjectService.SubscribeToCanvasObjects(newItems =>
-                {
-                    Trace.WriteLine($"Count {newItems.Count()}");
-                    Items = newItems;
-                }
-            ));
+            AddDisposables(
+                [
+                    _canvasObjectService.SubscribeToCanvasObjectsState(newItems =>
+                    {
+                        Trace.WriteLine($"Count {newItems.Count()}");
+                        Items = newItems;
+                    }),
+
+                    _canvasObjectService.SubscribeToConnectionsState(newConnections =>
+                    {
+                        Trace.WriteLine($"Count Connections {newConnections.Count()}");
+                        Connections = newConnections;
+                    }),
+
+                    _canvasObjectService.SubscribeToCurrentConnection(newConnection =>{
+                        Trace.WriteLine($"Setting ActiveConnection to {newConnection?.Name ?? "Null"}");
+                        ActiveConnection = newConnection;
+                    }),
+
+                    _canvasObjectService.SubscribeToIsConnectionModeActiveState(isActive => IsConnectionModeActive = isActive  ),
+                ]
+            );
         }
     }
 }

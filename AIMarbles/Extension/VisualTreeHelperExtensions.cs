@@ -5,14 +5,22 @@ namespace AIMarbles.Extensions
 {
     public static class VisualTreeHelperExtensions
     {
-        public static T? FindParent<T>(this DependencyObject child) where T : DependencyObject
+        public static bool FindParent<T>(this DependencyObject child, out T? result) where T : DependencyObject
         {
+            result = null;
             var parent = VisualTreeHelper.GetParent(child);
             while (parent != null && parent is not T)
             {
                 parent = VisualTreeHelper.GetParent(parent);
             }
-            return parent as T;
+
+            if (parent is T tParent)
+            {
+                result = tParent;
+                return true;
+            }
+
+            return false;
         }
 
     }

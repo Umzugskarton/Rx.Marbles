@@ -3,9 +3,13 @@ using System.Reactive.Disposables;
 
 namespace AIMarbles.Core
 {
-    abstract internal partial class ViewModelBase : ObservableObject, IDisposable
+    public abstract partial class ViewModelBase : ObservableObject, IDisposable
     {
         CompositeDisposable _disposables = new CompositeDisposable();
+
+        protected ViewModelBase()
+        {
+        }
 
         public void AddDisposables(CompositeDisposable disposables)
         {

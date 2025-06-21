@@ -1,6 +1,7 @@
 ﻿using AIMarbles.Core.Service;
 using AIMarbles.ViewModel;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,12 +20,27 @@ namespace AIMarbles
     public partial class MainWindow : Window
     {
 
-        private CanvasObjectService _canvasObjectService = new CanvasObjectService();
-        public MainWindow()
+        private MainWindow()
         {
             InitializeComponent();
-            MainWindowViewModel vm = new MainWindowViewModel(_canvasObjectService);
-            DataContext = vm;
         }
+
+        public MainWindow(MainWindowViewModel viewModel)
+        {
+            InitializeComponent();
+            DataContext = viewModel;
+        }
+
+        private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (this.DataContext is not MainWindowViewModel viewModel)
+            {
+                return;
+            }
+            if (!viewModel.CancelConnectionModeCommand.CanExecute(null)) { return;  }
+            // Execute the command
+            viewModel.CancelConnectionModeCommand.Execute(null);
+        }
+
     }
 }

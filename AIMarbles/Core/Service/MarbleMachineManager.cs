@@ -1,5 +1,4 @@
 ﻿using AIMarbles.Core.Helper;
-using AIMarbles.Core.Interface;
 using AIMarbles.Core.Interface.Pipeline;
 using AIMarbles.Core.Interface.Service;
 using AIMarbles.Core.Pipeline;
@@ -9,13 +8,8 @@ using AIMarbles.Extension;
 using AIMarbles.Model;
 using AIMarbles.ViewModel;
 using AIMarbles.ViewModel.CanvasObject;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AIMarbles.Core.Service
 {
@@ -25,7 +19,6 @@ namespace AIMarbles.Core.Service
     public class MarbleMachineManager : IMarbleMachineManager
     {
 
-        // Lieber doch States dann können wir auf einzelne pipeline änderungen direkt subscriben
         private ObservableRxDictionary<SequenceId, MIDIPipelineBuilder> _readyPipes;
         private readonly IDictionary<Type, Type> _translateMarbleTypes = new Dictionary<Type, Type>()
         {
@@ -54,7 +47,7 @@ namespace AIMarbles.Core.Service
         /// </summary>
         /// <param name="viewModel"></param>
         /// <returns>bool, true if succeeded, False if not</returns>
-        public bool registerActor(CanvasObjectViewModelBase viewModel)
+        public bool RegisterActor<T>(OperatorViewModelBase<T> viewModel)
         {
             if (_actors.ContainsKey(viewModel.ActorId))
             {
@@ -70,7 +63,7 @@ namespace AIMarbles.Core.Service
                 return false;
             }
 
-            IMarbleMachineActor? actor = Activator.CreateInstance(actorType, viewModel) as IMarbleMachineActor;
+            IMarbleMachineActor? actor = Activator.CreateInstance(actorType, [viewModel.ActorId, viewModel.ValueState]) as IMarbleMachineActor;
 
             if (actor == null)
             {
@@ -79,6 +72,7 @@ namespace AIMarbles.Core.Service
             }
 
             _actors.Add(viewModel.ActorId, actor);
+            Trace.WriteLine($"registered actor of type {actorType}, with id: {viewModel.ActorId}");
 
             return true;
         }

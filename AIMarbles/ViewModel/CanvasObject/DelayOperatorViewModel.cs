@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace AIMarbles.ViewModel
 {
+    // TODO
     public partial class DelayOperatorViewModel: CanvasObjectViewModelBase
     {
         // TODO Change to TimeSignature 

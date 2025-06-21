@@ -1,13 +1,15 @@
 ﻿using AIMarbles.Core;
 using AIMarbles.Core.Helper;
 using AIMarbles.Core.Interface;
+using AIMarbles.Core.Pipeline;
 using AIMarbles.Extension;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Diagnostics;
+using System.Reactive.Linq;
 
 namespace AIMarbles.ViewModel
 {
-    public partial class ChannelViewModel : CanvasObjectViewModelBase
+    public partial class ChannelViewModel : OperatorViewModelBase<int>
     {
         [ObservableProperty]
         private int _channelValue;
@@ -21,6 +23,7 @@ namespace AIMarbles.ViewModel
             IMarbleMachineEngine marbleMachineEngine
             ) : base(canvasObjectService, marbleMachineEngine)
         {
+            base.ValueState = ChannelState;
             SubscribeToChannelValueChanges();
         }
             
@@ -28,8 +31,10 @@ namespace AIMarbles.ViewModel
         {
             AddDisposables([
                 this.ObserveProperty(vm => vm.ChannelValue)
+                    .StartWith(1)
                     .Subscribe(value =>
                     {
+                        ChannelValue = value;
                         ChannelState.SetState(value);
                         Trace.WriteLine($"ViewModel: Channel value changed to: {value}");
                     })

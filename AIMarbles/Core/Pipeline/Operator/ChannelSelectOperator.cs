@@ -1,15 +1,11 @@
 ﻿using AIMarbles.Core.Helper;
+using AIMarbles.Core.Interface.Pipeline;
 using AIMarbles.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AIMarbles.Core.Pipeline.Operator
 {
-    internal class ChannelSelectOperator
+    internal class ChannelSelectOperator: IMarbleOperator
     {        
         private readonly State<int> _channelState;
 

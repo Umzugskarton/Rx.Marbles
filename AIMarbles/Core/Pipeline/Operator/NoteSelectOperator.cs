@@ -2,11 +2,12 @@
 using AIMarbles.Core.Interface.Pipeline;
 using AIMarbles.Model;
 using AIMarbles.MusicTheory;
+using System.Diagnostics;
 using System.Reactive.Linq;
 
 namespace AIMarbles.Core.Pipeline.Operator
 {
-    class NoteSelectOperator : IMarbleOperator
+    internal class NoteSelectOperator : IMarbleOperator
     {
 
         private readonly State<Pitch> _pitchState;
@@ -19,16 +20,21 @@ namespace AIMarbles.Core.Pipeline.Operator
         {
             _actorId = actorId;
             _pitchState = pitchState;
+            pitchState.AsObservable().Subscribe(test => Trace.WriteLine($"Changed in operator to {test.ToString()}"));
         }
 
         public IObservable<MIDIMarble> Apply(IObservable<MIDIMarble> source)
         {
             return source
-                .WithLatestFrom(_pitchState.AsObservable(), (marble, pitch) => new { marble, pitch })
+                .WithLatestFrom(_pitchState.AsObservable())
                 .Select(pair =>
                 {
-                    var newMarble = pair.marble.Clone();
-                    newMarble.Pitch = pair.pitch;
+
+                    var (marble, pitch) = pair;
+                    Trace.WriteLine($" Note {pitch.ToString()}");
+
+                    var newMarble = marble.Clone();
+                    newMarble.Pitch = pitch;
 
                     return newMarble;
                 });

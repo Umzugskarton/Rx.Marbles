@@ -56,7 +56,7 @@ namespace AIMarbles.Core.Behavior
             element.SetValue(CurrentCanvasBehaviorStateProperty, dragState);
             element.CaptureMouse(); // Crucial for continuous dragging even if mouse leaves element
 
-            Trace.WriteLine($"Drag started for {item.Name}. StartPoint (relative to item): {dragState.StartPoint}");
+            // Trace.WriteLine($"Drag started for {item.Name}. StartPoint (relative to item): {dragState.StartPoint}");
         }
 
         private static void OnPreviewMouseMove(object sender, MouseEventArgs e)
@@ -87,7 +87,7 @@ namespace AIMarbles.Core.Behavior
 
             if (canvasWidth <= 0 || canvasHeight <= 0)
             {
-                Trace.WriteLine($"WARNING: Canvas ActualWidth ({canvasWidth}) or ActualHeight ({canvasHeight}) is zero. Cannot constrain movement. Item: {draggingObject.Name}. Check XAML layout for ItemsControl and its parent.");
+                Trace.TraceWarning($"WARNING: Canvas ActualWidth ({canvasWidth}) or ActualHeight ({canvasHeight}) is zero. Cannot constrain movement. Item: {draggingObject.Name}. Check XAML layout for ItemsControl and its parent.");
                 return; // Prevent movement if canvas size is unknown
             }
 
@@ -95,7 +95,7 @@ namespace AIMarbles.Core.Behavior
             draggingObject.X = Math.Max(0, Math.Min(newX, canvasWidth - itemWidth));
             draggingObject.Y = Math.Max(0, Math.Min(newY, canvasHeight - itemHeight));
 
-            Trace.WriteLine($"Item {draggingObject.Name} moved to ({draggingObject.X:F2}|{draggingObject.Y:F2}) on Canvas ({canvasWidth:F2}|{canvasHeight:F2})");
+            //Trace.WriteLine($"Item {draggingObject.Name} moved to ({draggingObject.X:F2}|{draggingObject.Y:F2}) on Canvas ({canvasWidth:F2}|{canvasHeight:F2})");
         }
 
         private static void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)

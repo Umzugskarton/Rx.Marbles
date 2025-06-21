@@ -51,19 +51,21 @@ namespace AIMarbles.Core.Service
         public void AddNote()
         {
             var newAction = CreateCanvasObject(_noteViewModelFactory);
-            _marbleMachineManager.(newAction);
+            _marbleMachineManager.RegisterActor(newAction);
             AddCanvasObject(newAction);
         }
 
         public void AddChannel()
         {
             var newChannel = CreateCanvasObject(_channelViewModelFactory);
+            _marbleMachineManager.RegisterActor(newChannel);
             AddCanvasObject(newChannel);
         }
 
         public void AddMetronom()
         {
             var newMetronom = CreateCanvasObject(_metronomViewModelFactory);
+            _marbleMachineManager.RegisterActor(newMetronom);
             AddCanvasObject(newMetronom);
         }
 
@@ -105,6 +107,9 @@ namespace AIMarbles.Core.Service
         {
             var newConnection = _connectionsState.CurrentValue.Last();
             newConnection.To = to;
+            var fromConnector = _currentFromConnectorState.CurrentValue;
+            if(fromConnector == null) { return; }
+            _marbleMachineManager.RegisterConnection(fromConnector, to);
             _currentFromConnectorState.SetState(null);
         }
 

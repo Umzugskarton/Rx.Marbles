@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Diagnostics;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
 namespace AIMarbles.Core.Helper;
@@ -23,6 +24,8 @@ public class State<T>
     public void SetState(T newState)
     {
         _state.OnNext(newState);
+        Trace.WriteLine($"State<{typeof(T).Name}> (Hash: {this.GetHashCode()}): SetState called with {newState}");
     }
 }
+
 
